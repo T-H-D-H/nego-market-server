@@ -12,6 +12,7 @@ app.use(express.urlencoded({ extended: false }));
 app.get("/", async (req, res) => {
   res.send("hello world");
 });
-app.use("/api/user", userRouter);
+
+app.use("/api", userRouter);
 
 export { app };
