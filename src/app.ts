@@ -1,5 +1,7 @@
 import * as express from "express";
 import { userRouter } from "./routers/user.routes";
+import { addressRouter } from "./routers/address.routes";
+import { errorHandler } from "./middlewares/error-handler";
 
 const app: express.Express = express();
 
@@ -14,5 +16,8 @@ app.get("/", async (req, res) => {
 });
 
 app.use("/api", userRouter);
+app.use("/api", addressRouter);
+
+app.use(errorHandler);
 
 export { app };
