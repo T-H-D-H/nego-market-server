@@ -8,7 +8,6 @@ export async function getAddresses() {
 
 export async function getAddress(address: string) {
   const [si, gu, dong] = address.split(" ");
-  console.log(si, gu, dong);
   const result = await addressModel.getAddress(si, gu, dong);
 
   return result;

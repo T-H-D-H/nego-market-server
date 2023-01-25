@@ -6,17 +6,52 @@ import { isEmpty } from "../utils/object-empty-check";
 //* TODO: register 입력값 검증(client와 스펙 정한 후), express-validator 사용
 const userRouter = Router();
 
+
+/**
+ * @openapi
+ * /api/users:
+ *  get:
+ *    tags:
+ *     - User
+ *    description: 모든 유저 리스트 반환
+ *    responses:
+ *      200:
+ *        description: return all user
+ *      400:
+ *        description: bad request
+ */
 userRouter.get("/users", async (req: Request, res: Response, next: NextFunction) => {
   try {
     const users = await userService.getUsers();
 
-    res.send(users);
+    res.status(200).json(users);
   } catch (error) {
     next(error);
   }
 });
 
-//* 회원가입
+// 회원가입
+/**
+ * @openapi
+ * '/api/user/register':
+ *  post:
+ *    tags:
+ *      - User
+ *    summary: Register all user
+ *    description: 새로운 유저 추가
+ *    requestBody:
+ *     required: true
+ *     content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/CreateUserInput'
+ *    responses:
+ *      201:
+ *        description: SUCCESS
+ *      400:
+ *        description: Bad request
+ *
+ */
 userRouter.post("/user/register", async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (isEmpty(req.body)) {
@@ -38,13 +73,13 @@ userRouter.post("/user/register", async (req: Request, res: Response, next: Next
 
     const createdUser = await userService.registerUser(name, email, password, nickname, address.id, tel);
 
-    res.status(201).send("OK");
+    res.status(201).send("SUCCESS");
   } catch (error) {
     next(error);
   }
 });
 
-//* 아이디(email) 중복 체크 API
+//* 아이디(email) 중복 체크
 userRouter.post("/user/id-duplication", async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (isEmpty(req.body)) {
@@ -64,7 +99,7 @@ userRouter.post("/user/id-duplication", async (req: Request, res: Response, next
   }
 });
 
-//* 닉네임 중복 체크 API
+//* 닉네임 중복 체크
 userRouter.post("/user/nickname-duplication", async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (isEmpty(req.body)) {
@@ -96,13 +131,33 @@ userRouter.post("/user/login", async (req: Request, res: Response, next: NextFun
     const token = await userService.getUserToken(email, password);
 
     res.status(200).json(token);
-    
   } catch (error) {
     next(error);
   }
 });
 
 //* 회원탈퇴
+/**
+ * @openapi
+ * '/api/user':
+ *  delete:
+ *    tags:
+ *      - User
+ *    summary: Delete a user
+ *    description: 유저 삭제
+ *    requestBody:
+ *     required: true
+ *     content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/DeleteUserInput'
+ *    responses:
+ *      200:
+ *        description: SUCCESS
+ *      400:
+ *        description: Bad request
+ *
+ */
 userRouter.delete("/user", async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (isEmpty(req.body)) {
@@ -114,8 +169,7 @@ userRouter.delete("/user", async (req: Request, res: Response, next: NextFunctio
 
     await userService.deleteUser(email, password);
 
-    res.status(204).send();
-
+    res.status(200).send("SUCCESS");
   } catch (error) {
     next(error);
   }
