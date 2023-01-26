@@ -1,5 +1,5 @@
 import pool from "./index";
-import { Address } from "types/address";
+import { Address, AddressSi, AddressGu, AddressDong } from "types/address";
 
 export async function getAddresses(): Promise<Address[]> {
   const [rows] = await pool.query(
@@ -21,4 +21,36 @@ export async function getAddress(si: string, gu: string, dong: string): Promise<
   );
 
   return rows[0];
+}
+
+export async function getAddressSi(): Promise<AddressSi[]> {
+  const [rows] = await pool.query(
+    `SELECT DISTINCT si 
+     FROM address`
+  );
+
+  return rows;
+}
+
+export async function getAddressGu(si: string): Promise<AddressGu[]> {
+  const [rows] = await pool.query(
+    `SELECT gu
+     FROM address
+     WHERE si = ?`,
+    [si]
+  );
+
+  return rows;
+}
+
+export async function getAddressDong(si: string, gu: string): Promise<AddressDong[]> {
+  const [rows] = await pool.query(
+    `SELECT dong
+     FROM address
+     WHERE si = ?
+     AND gu = ?`,
+    [si, gu]
+  );
+
+  return rows;
 }
