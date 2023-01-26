@@ -26,7 +26,8 @@ export async function getAddress(si: string, gu: string, dong: string): Promise<
 export async function getAddressSi(): Promise<AddressSi[]> {
   const [rows] = await pool.query(
     `SELECT DISTINCT si 
-     FROM address`
+     FROM address
+     ORDER BY si`
   );
 
   return rows;
@@ -34,9 +35,10 @@ export async function getAddressSi(): Promise<AddressSi[]> {
 
 export async function getAddressGu(si: string): Promise<AddressGu[]> {
   const [rows] = await pool.query(
-    `SELECT gu
+    `SELECT DISTINCT gu
      FROM address
-     WHERE si = ?`,
+     WHERE si = ?
+     ORDER BY gu`,
     [si]
   );
 
@@ -48,7 +50,8 @@ export async function getAddressDong(si: string, gu: string): Promise<AddressDon
     `SELECT dong
      FROM address
      WHERE si = ?
-     AND gu = ?`,
+     AND gu = ?
+     ORDER BY dong`,
     [si, gu]
   );
 
