@@ -1,6 +1,7 @@
 import * as userModel from "../db/user.model";
+import * as addresModel from "../db/address.model";
 import * as bcrypt from "bcrypt";
-import { User } from "types/user";
+import { User, UserMyPage } from "types/user";
 import * as jwt from "jsonwebtoken";
 import "dotenv/config";
 
@@ -61,4 +62,38 @@ export async function deleteUser(email: string, password: string): Promise<void>
   }
 
   await userModel.deleteUser(email);
+}
+
+export async function getMyPageInfo(email: string, password: string): Promise<UserMyPage> {
+  const user = await getUserByEmail(email);
+
+  if (!user) {
+    throw new Error("해당 이메일은 가입 내역이 없습니다. 다시 한 번 확인해 주세요.");
+  }
+
+  const correctHashedPassword = user.password;
+  const isPasswordCorrect = await bcrypt.compare(password, correctHashedPassword);
+
+  if (!isPasswordCorrect) {
+    throw new Error("비밀번호가 일치하지 않습니다. 다시 한 번 확인해 주세요.");
+  }
+
+  const address = await addresModel.getAddressById(user.address_id);
+
+  if (!address) {
+    throw new Error("주소가 올바르지 않습니다. 다시 한 번 확인해 주세요.");
+  }
+
+  // 회원정보 수정 페이지에 표시되는 데이터 파싱
+  const myPageUserInfo: UserMyPage = {
+    email: user.email,
+    name: user.name,
+    nickname: user.nickname,
+    tel: user.tel,
+    si: address.si,
+    gu: address.gu,
+    dong: address.dong,
+  };
+
+  return myPageUserInfo;
 }

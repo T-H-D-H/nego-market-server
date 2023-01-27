@@ -308,7 +308,7 @@ userRouter.delete("/user", async (req: Request, res: Response, next: NextFunctio
 
     const email = req.body.email;
     const password = req.body.password;
-    
+
     await userService.deleteUser(email, password);
 
     res.status(200).send("SUCCESS");
@@ -318,4 +318,57 @@ userRouter.delete("/user", async (req: Request, res: Response, next: NextFunctio
 });
 
 
+//* 회원정보 수정 페이지
+/**
+ * @openapi
+ * '/api/user/mypage':
+ *  post:
+ *    tags:
+ *      - User
+ *    summary: Edit User Info
+ *    description: 회원정보 수정 페이지에 표시될 정보 제공
+ *    requestBody:
+ *     required: true
+ *     content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/MyPageInput'
+ *    responses:
+ *      200:
+ *        description: 성공시 회원정보 페이지에 표시 될 유저 정보 반환
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/MyPageResponse'
+ *      400:
+ *        description: Bad request
+ *
+ */
+userRouter.post("/user/mypage", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (isEmpty(req.body)) {
+      throw new Error("headers의 Content-Type을 application/json으로 설정해주세요");
+    }
+
+    const email: string = req.body.email;
+    const password: string = req.body.password;
+
+    if (!email.trim()) {
+      throw new Error("이메일을 입력해 주세요");
+    } else if (!password.trim()) {
+      throw new Error("패스워드를 입력해 주세요");
+    }
+
+    const myPageInfo = await userService.getMyPageInfo(email, password);
+    res.status(200).json(myPageInfo);
+  } catch (error) {
+    next(error);
+  }
+});
+
+/** TODO, 하나의 API에서 가능?
+  - 닉네임 수정 api 구현
+  - 전화번호 수정 api 구현
+  - 지역 수정 api 구현
+ */
 export { userRouter };

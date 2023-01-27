@@ -57,3 +57,14 @@ export async function getAddressDong(si: string, gu: string): Promise<AddressDon
 
   return rows;
 }
+
+export async function getAddressById(id: number): Promise<Address> {
+  const [rows] = await pool.query(
+    `SELECT *
+     FROM address
+     WHERE id = ?`,
+    [id]
+  );
+
+  return rows[0];
+}

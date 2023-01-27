@@ -98,4 +98,41 @@
  *      properties:
  *        token:
  *          type: string
+ *    MyPageInput:
+ *      type: object
+ *      required:
+ *        - email
+ *        - password
+ *      properties:
+ *        email:
+ *          type: string
+ *          default: donghwa@example.com
+ *        password:
+ *          type: string
+ *          default: temp1234
+ *    MyPageResponse:
+ *      type: object
+ *      required:
+ *        - email
+ *        - name
+ *        - nickname
+ *        - tel
+ *        - si
+ *        - gu
+ *        - dong
+ *      properties:
+ *        email:
+ *          type: string
+ *        name:
+ *          type: string
+ *        nickname:
+ *          type: string
+ *        tel:
+ *          type: string
+ *        si:
+ *          type: string
+ *        gu:
+ *          type: string
+ *        dong:
+ *          type: string
  */
