@@ -16,6 +16,10 @@ export async function getUserByNickname(nickname: string): Promise<User> {
   return await userModel.getUserByNickname(nickname);
 }
 
+export async function getUserByTel(tel: string): Promise<User> {
+  return await userModel.getUserByTel(tel);
+}
+
 export async function registerUser(name: string, email: string, password: string, nickname: string, address_id: number, tel: string): Promise<User> {
   const salt = 13;
   const hashedPassword = await bcrypt.hash(password, salt);

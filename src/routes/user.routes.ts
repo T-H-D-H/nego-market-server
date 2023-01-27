@@ -6,7 +6,7 @@ import { isEmpty } from "../utils/object-empty-check";
 //* TODO: register 입력값 검증(client와 스펙 정한 후), express-validator 사용
 const userRouter = Router();
 
-
+// 모든 유저 리스트 반환 - 필요 없으면 삭제
 /**
  * @openapi
  * /api/users:
@@ -37,9 +37,10 @@ userRouter.get("/users", async (req: Request, res: Response, next: NextFunction)
  *  post:
  *    tags:
  *      - User
- *    summary: Register all user
+ *    summary: Register a user
  *    description: 새로운 유저 추가
  *    requestBody:
+ *     description: address는 시, 구, 동을 공백으로 구분
  *     required: true
  *     content:
  *        application/json:
@@ -47,7 +48,7 @@ userRouter.get("/users", async (req: Request, res: Response, next: NextFunction)
  *            $ref: '#/components/schemas/CreateUserInput'
  *    responses:
  *      201:
- *        description: SUCCESS
+ *        description: 회원가입 성공시 'SUCCESS' 반환
  *      400:
  *        description: Bad request
  *
@@ -71,7 +72,7 @@ userRouter.post("/user/register", async (req: Request, res: Response, next: Next
       throw new Error("유효하지 않은 주소입니다.");
     }
 
-    const createdUser = await userService.registerUser(name, email, password, nickname, address.id, tel);
+    await userService.registerUser(name, email, password, nickname, address.id, tel);
 
     res.status(201).send("SUCCESS");
   } catch (error) {
@@ -80,46 +81,187 @@ userRouter.post("/user/register", async (req: Request, res: Response, next: Next
 });
 
 //* 아이디(email) 중복 체크
-userRouter.post("/user/id-duplication", async (req: Request, res: Response, next: NextFunction) => {
+/**
+ * @openapi
+ * '/api/user/id-duplication-check':
+ *  post:
+ *    tags:
+ *      - User
+ *    summary: ID duplication check
+ *    description: 아이디 중복 체크
+ *    requestBody:
+ *     required: true
+ *     content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/IdDuplicationCheckInput'
+ *    responses:
+ *      200:
+ *        description: 중복인 경우 { "result" &#58; true }, 중복이 아닌 경우 { "result" &#58; false }  를 반환
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/IdDuplicationCheckResponse'
+ *      400:
+ *        description: Bad request
+ *
+ */
+userRouter.post("/user/id-duplication-check", async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (isEmpty(req.body)) {
       throw new Error("headers의 Content-Type을 application/json으로 설정해주세요");
     }
 
     const email: string = req.body.email;
+
+    // 공백 문자열만 들어온 경우 예외처리
+    if (!email.trim()) {
+      throw new Error("email을 입력해 주세요");
+    }
+
     const user = await userService.getUserByEmail(email);
 
+    let result: boolean = false;
     if (user) {
-      res.status(200).json({ result: true });
-    } else {
-      res.status(200).json({ result: false });
+      result = true;
     }
+
+    res.status(200).json({ result });
   } catch (error) {
     next(error);
   }
 });
 
 //* 닉네임 중복 체크
-userRouter.post("/user/nickname-duplication", async (req: Request, res: Response, next: NextFunction) => {
+/**
+ * @openapi
+ * '/api/user/nickname-duplication-check':
+ *  post:
+ *    tags:
+ *      - User
+ *    summary: Nickname duplication check
+ *    description: 닉네임 중복 체크
+ *    requestBody:
+ *     required: true
+ *     content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/NicknameDuplicationCheckInput'
+ *    responses:
+ *      200:
+ *        description: 중복인 경우 { "result" &#58; true }, 중복이 아닌 경우 { "result" &#58; false }  를 반환
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/NicknameDuplicationCheckResponse'
+ *      400:
+ *        description: Bad request
+ *
+ */
+userRouter.post("/user/nickname-duplication-check", async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (isEmpty(req.body)) {
       throw new Error("headers의 Content-Type을 application/json으로 설정해주세요");
     }
 
     const nickname: string = req.body.nickname;
+
+    // 공백 문자열만 들어온 경우 예외처리
+    if (!nickname.trim()) {
+      throw new Error("nickname을 입력해 주세요");
+    }
+
     const user = await userService.getUserByNickname(nickname);
 
+    let result: boolean = false;
     if (user) {
-      res.status(200).json({ result: true });
-    } else {
-      res.status(200).json({ result: false });
+      result = true;
     }
+
+    res.status(200).json({ result });
+  } catch (error) {
+    next(error);
+  }
+});
+
+//* 핸드폰번호 중복 체크
+/**
+ * @openapi
+ * '/api/user/tel-duplication-check':
+ *  post:
+ *    tags:
+ *      - User
+ *    summary: Tel duplication check
+ *    description: 핸드폰번호 중복 체크
+ *    requestBody:
+ *     required: true
+ *     content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/TelDuplicationCheckInput'
+ *    responses:
+ *      200:
+ *        description: 중복인 경우 { "result" &#58; true }, 중복이 아닌 경우 { "result" &#58; false }  를 반환
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/TelDuplicationCheckResponse'
+ *      400:
+ *        description: Bad request
+ *
+ */
+userRouter.post("/user/tel-duplication-check", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (isEmpty(req.body)) {
+      throw new Error("headers의 Content-Type을 application/json으로 설정해주세요");
+    }
+
+    const tel: string = req.body.tel;
+
+    // 공백 문자열만 들어온 경우 예외처리
+    if (!tel.trim()) {
+      throw new Error("tel을 입력해 주세요");
+    }
+
+    const user = await userService.getUserByTel(tel);
+
+    let result: boolean = false;
+    if (user) {
+      result = true;
+    }
+
+    res.status(200).json({ result });
   } catch (error) {
     next(error);
   }
 });
 
 //* 로그인
+/**
+ * @openapi
+ * '/api/user/login':
+ *  post:
+ *    tags:
+ *      - User
+ *    summary: login
+ *    description: 로그인
+ *    requestBody:
+ *     required: true
+ *     content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/LoginInput'
+ *    responses:
+ *      200:
+ *        description: 로그인 성공시 토큰을 반환
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/LoginResponse'
+ *      400:
+ *        description: Bad request
+ *
+ */
 userRouter.post("/user/login", async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (isEmpty(req.body)) {
@@ -153,7 +295,7 @@ userRouter.post("/user/login", async (req: Request, res: Response, next: NextFun
  *            $ref: '#/components/schemas/DeleteUserInput'
  *    responses:
  *      200:
- *        description: SUCCESS
+ *        description: 회원탈퇴 성공시 "SUCCESS" 반환
  *      400:
  *        description: Bad request
  *
@@ -166,7 +308,7 @@ userRouter.delete("/user", async (req: Request, res: Response, next: NextFunctio
 
     const email = req.body.email;
     const password = req.body.password;
-
+    
     await userService.deleteUser(email, password);
 
     res.status(200).send("SUCCESS");
@@ -174,5 +316,6 @@ userRouter.delete("/user", async (req: Request, res: Response, next: NextFunctio
     next(error);
   }
 });
+
 
 export { userRouter };

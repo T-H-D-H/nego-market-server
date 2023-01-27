@@ -28,6 +28,17 @@ export async function getUserByNickname(nickname: string): Promise<User> {
   return rows[0];
 }
 
+export async function getUserByTel(tel: string): Promise<User> {
+  const [rows] = await pool.query(
+    `SELECT *
+     FROM user
+     WHERE tel = ?`,
+    [tel]
+  );
+
+  return rows[0];
+}
+
 export async function getUserById(id: number): Promise<User> {
   const [rows] = await pool.query(
     `SELECT *
