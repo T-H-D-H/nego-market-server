@@ -135,4 +135,26 @@
  *          type: string
  *        dong:
  *          type: string
+ *    MyPageEditInput:
+ *      type: object
+ *      required:
+ *        - email
+ *        - new_nickname
+ *        - new_tel
+ *        - new_address_name
+ *      properties:
+ *        email:
+ *          type: string
+ *          default: donghwa@example.com
+ *          description: 필수
+ *        new_nickname:
+ *          type: string | null
+ *          default: null
+ *        new_tel:
+ *          type: string | null
+ *          default: null
+ *        new_address_name:
+ *          type: string | null
+ *          default: 부산광역시 해운대구 좌동
+ *
  */

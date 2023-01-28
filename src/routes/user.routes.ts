@@ -317,7 +317,6 @@ userRouter.delete("/user", async (req: Request, res: Response, next: NextFunctio
   }
 });
 
-
 //* 회원정보 수정 페이지
 /**
  * @openapi
@@ -325,7 +324,7 @@ userRouter.delete("/user", async (req: Request, res: Response, next: NextFunctio
  *  post:
  *    tags:
  *      - User
- *    summary: Edit User Info
+ *    summary: Mypage user info
  *    description: 회원정보 수정 페이지에 표시될 정보 제공
  *    requestBody:
  *     required: true
@@ -366,9 +365,63 @@ userRouter.post("/user/mypage", async (req: Request, res: Response, next: NextFu
   }
 });
 
-/** TODO, 하나의 API에서 가능?
-  - 닉네임 수정 api 구현
-  - 전화번호 수정 api 구현
-  - 지역 수정 api 구현
+// 회원정보 수정
+/**
+ * @openapi
+ * '/api/user':
+ *  patch:
+ *    tags:
+ *      - User
+ *    summary: Edit User Info
+ *    description: 회원정보 수정 API (닉네임, 전화번호, 주소) <br><br> 이메일은 유저를 특정하기 위한 필수 항목<br> 이메일을 제외한 항목은 수정할 항목 하나에만 값을 넣고, 나머지는 null값을 넣어야 함<br><br> 예) 주소를 수정하는 요청을 보내고 싶은 경우 아래 Example Value와 같이 Body값을 설정해 주어야 함
+ *    requestBody:
+ *     required: true
+ *     content:
+ *        application/json:
+ *          schema:
+ *            $ref: '#/components/schemas/MyPageEditInput'
+ *    responses:
+ *      200:
+ *        description: 성공시 수정된 유저 정보 변환
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/MyPageResponse'
+ *      400:
+ *        description: Bad request
+ *
  */
+userRouter.patch("/user", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (isEmpty(req.body)) {
+      throw new Error("headers의 Content-Type을 application/json으로 설정해주세요");
+    }
+
+    const email: string = req.body.email;
+    const new_nickname: string = req.body.new_nickname;
+    const new_tel: string = req.body.new_tel;
+    const new_address_name: string = req.body.new_address_name;
+
+    //* email이 null인 경우 예외
+    if (email === null) {
+      throw new Error("id(email)은 필수 항목입니다.");
+    }
+
+    //* new_nickname, new_tel, new_address_name 중 2개 이상의 항목에 null값이 아닌 값을 할당하여 요청을 보낸 경우 예외 처리
+    if (
+      !(
+        (new_nickname && new_tel === null && new_address_name === null) ||
+        (new_tel && new_nickname === null && new_address_name === null) ||
+        (new_address_name && new_nickname === null && new_tel === null)
+      )
+    ) {
+      throw new Error("수정하고 싶은 항목이 모두 null이거나 2개 이상입니다. 수정하고 싶은 항목 하나만 선택해 주세요.");
+    }
+    const new_user = await userService.editUserInfo({ email, new_nickname, new_tel, new_address_name });
+
+    res.status(200).json(new_user);
+  } catch (error) {
+    next(error);
+  }
+});
 export { userRouter };

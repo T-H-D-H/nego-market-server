@@ -69,3 +69,42 @@ export async function deleteUser(email: string): Promise<void> {
     [email]
   );
 }
+
+export async function editNickname(email: string, nickname: string) {
+  await pool.query(
+    `UPDATE user 
+     SET nickname = ?
+     WHERE email = ?`,
+    [nickname, email]
+  );
+
+  const user = await getUserByEmail(email);
+
+  return user;
+}
+
+export async function editTel(email: string, tel: string) {
+  await pool.query(
+    `UPDATE user 
+     SET tel = ?
+     WHERE email = ?`,
+    [tel, email]
+  );
+
+  const user = await getUserByEmail(email);
+
+  return user;
+}
+
+export async function editAddress(email: string, address_id: number) {
+  await pool.query(
+    `UPDATE user 
+     SET address_id = ?
+     WHERE email = ?`,
+    [address_id, email]
+  );
+
+  const user = await getUserByEmail(email);
+
+  return user;
+}

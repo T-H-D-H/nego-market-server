@@ -19,3 +19,10 @@ export interface UserMyPage {
   gu: string;
   dong: string;
 }
+
+export interface UserEditGet {
+  email: string;
+  new_nickname: string;
+  new_tel: string;
+  new_address_name: string;
+}

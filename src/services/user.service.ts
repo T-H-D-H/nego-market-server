@@ -1,7 +1,8 @@
 import * as userModel from "../db/user.model";
 import * as addresModel from "../db/address.model";
 import * as bcrypt from "bcrypt";
-import { User, UserMyPage } from "types/user";
+import { User, UserMyPage, UserEditGet } from "types/user";
+import { Address } from "types/address";
 import * as jwt from "jsonwebtoken";
 import "dotenv/config";
 
@@ -96,4 +97,56 @@ export async function getMyPageInfo(email: string, password: string): Promise<Us
   };
 
   return myPageUserInfo;
+}
+
+export function myPageUserInfo(user: User, address: Address): UserMyPage {
+  const edited_user: UserMyPage = {
+    email: user.email,
+    name: user.name,
+    nickname: user.nickname,
+    tel: user.tel,
+    si: address.si,
+    gu: address.gu,
+    dong: address.dong,
+  };
+
+  return edited_user;
+}
+
+export async function editUserInfo(userInfo: UserEditGet): Promise<UserMyPage> {
+  const email: string = userInfo.email;
+  const new_nickname: string = userInfo.new_nickname;
+  const new_tel: string = userInfo.new_tel;
+  const new_address_name: string = userInfo.new_address_name;
+
+  if (new_nickname != null) {
+    // nickname 수정
+    const user = await userModel.editNickname(email, new_nickname);
+    const address = await addresModel.getAddressById(user.address_id);
+
+    const edited_user: UserMyPage = myPageUserInfo(user, address);
+
+    return edited_user;
+  } else if (new_tel != null) {
+    // tel 수정
+    const user = await userModel.editTel(email, new_tel);
+    const address = await addresModel.getAddressById(user.address_id);
+
+    const edited_user: UserMyPage = myPageUserInfo(user, address);
+
+    return edited_user;
+  } else {
+    //주소 수정
+    const [si, gu, dong] = new_address_name.split(" ");
+    const address = await addresModel.getAddress(si, gu, dong);
+
+    if (!address) {
+      throw new Error("올바르지 않은 주소입니다. 다시 한 번 확인해 주세요.");
+    }
+
+    const user = await userModel.editAddress(email, address.id);
+    const edited_user: UserMyPage = myPageUserInfo(user, address);
+
+    return edited_user;
+  }
 }
