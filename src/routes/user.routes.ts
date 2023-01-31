@@ -2,6 +2,9 @@ import * as userService from "../services/user.service";
 import * as addressService from "../services/address.service";
 import { Router, Request, Response, NextFunction } from "express";
 import { isEmpty } from "../utils/object-empty-check";
+import { signupValidator } from "../middlewares/validation-check";
+import { validationResult } from "express-validator";
+import { loginRequired } from "../middlewares/login-required";
 
 //* TODO: register 입력값 검증(client와 스펙 정한 후), express-validator 사용
 const userRouter = Router();
@@ -53,8 +56,13 @@ userRouter.get("/users", async (req: Request, res: Response, next: NextFunction)
  *        description: Bad request
  *
  */
-userRouter.post("/user/register", async (req: Request, res: Response, next: NextFunction) => {
+userRouter.post("/user/register", signupValidator, async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
     if (isEmpty(req.body)) {
       throw new Error("headers의 Content-Type을 application/json으로 설정해주세요");
     }
@@ -321,17 +329,13 @@ userRouter.delete("/user", async (req: Request, res: Response, next: NextFunctio
 /**
  * @openapi
  * '/api/user/mypage':
- *  post:
+ *  get:
  *    tags:
  *      - User
  *    summary: Mypage user info
+ *    security:
+ *      - bearerAuth: []
  *    description: 회원정보 수정 페이지에 표시될 정보 제공
- *    requestBody:
- *     required: true
- *     content:
- *        application/json:
- *          schema:
- *            $ref: '#/components/schemas/MyPageInput'
  *    responses:
  *      200:
  *        description: 성공시 회원정보 페이지에 표시 될 유저 정보 반환
@@ -343,22 +347,11 @@ userRouter.delete("/user", async (req: Request, res: Response, next: NextFunctio
  *        description: Bad request
  *
  */
-userRouter.post("/user/mypage", async (req: Request, res: Response, next: NextFunction) => {
+userRouter.get("/user/mypage", loginRequired, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    if (isEmpty(req.body)) {
-      throw new Error("headers의 Content-Type을 application/json으로 설정해주세요");
-    }
+    const email: string = req.userEmail;
+    const myPageInfo = await userService.getMyPageInfo(email);
 
-    const email: string = req.body.email;
-    const password: string = req.body.password;
-
-    if (!email.trim()) {
-      throw new Error("이메일을 입력해 주세요");
-    } else if (!password.trim()) {
-      throw new Error("패스워드를 입력해 주세요");
-    }
-
-    const myPageInfo = await userService.getMyPageInfo(email, password);
     res.status(200).json(myPageInfo);
   } catch (error) {
     next(error);

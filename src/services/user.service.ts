@@ -6,6 +6,19 @@ import { Address } from "types/address";
 import * as jwt from "jsonwebtoken";
 import "dotenv/config";
 
+export function myPageUserInfo(user: User, address: Address): UserMyPage {
+  const edited_user: UserMyPage = {
+    email: user.email,
+    name: user.name,
+    nickname: user.nickname,
+    tel: user.tel,
+    si: address.si,
+    gu: address.gu,
+    dong: address.dong,
+  };
+
+  return edited_user;
+}
 export async function getUsers(): Promise<User[]> {
   return await userModel.getUsers();
 }
@@ -65,18 +78,11 @@ export async function deleteUser(email: string, password: string): Promise<void>
   await userModel.deleteUser(email);
 }
 
-export async function getMyPageInfo(email: string, password: string): Promise<UserMyPage> {
+export async function getMyPageInfo(email: string): Promise<UserMyPage> {
   const user = await getUserByEmail(email);
 
   if (!user) {
     throw new Error("해당 이메일은 가입 내역이 없습니다. 다시 한 번 확인해 주세요.");
-  }
-
-  const correctHashedPassword = user.password;
-  const isPasswordCorrect = await bcrypt.compare(password, correctHashedPassword);
-
-  if (!isPasswordCorrect) {
-    throw new Error("비밀번호가 일치하지 않습니다. 다시 한 번 확인해 주세요.");
   }
 
   const address = await addresModel.getAddressById(user.address_id);
@@ -86,31 +92,9 @@ export async function getMyPageInfo(email: string, password: string): Promise<Us
   }
 
   // 회원정보 수정 페이지에 표시되는 데이터 파싱
-  const myPageUserInfo: UserMyPage = {
-    email: user.email,
-    name: user.name,
-    nickname: user.nickname,
-    tel: user.tel,
-    si: address.si,
-    gu: address.gu,
-    dong: address.dong,
-  };
+  const userInfo: UserMyPage = myPageUserInfo(user, address);
 
-  return myPageUserInfo;
-}
-
-export function myPageUserInfo(user: User, address: Address): UserMyPage {
-  const edited_user: UserMyPage = {
-    email: user.email,
-    name: user.name,
-    nickname: user.nickname,
-    tel: user.tel,
-    si: address.si,
-    gu: address.gu,
-    dong: address.dong,
-  };
-
-  return edited_user;
+  return userInfo;
 }
 
 export async function editUserInfo(userInfo: UserEditGet): Promise<UserMyPage> {
