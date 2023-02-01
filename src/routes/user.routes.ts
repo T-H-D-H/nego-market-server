@@ -54,6 +54,8 @@ userRouter.get("/users", async (req: Request, res: Response, next: NextFunction)
  *        description: 회원가입 성공시 'SUCCESS' 반환
  *      400:
  *        description: Bad request
+ *      422:
+ *        description: validation failed
  *
  */
 userRouter.post("/user/register", signupValidator, async (req: Request, res: Response, next: NextFunction) => {
