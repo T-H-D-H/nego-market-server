@@ -7,9 +7,19 @@ import { upload } from "../middlewares/image-upload";
 const productRouter = Router();
 
 //* 사진 업로드는 3장으로 제한
-productRouter.post("/product", upload.array("many", 3), (req, res) => {
-  // 저장된 이미지의 메타데이터
-  console.log(req.files);
+productRouter.post("/product", upload.array("many", 3), (req, res, file) => {
+  //* 저장된 이미지의 메타데이터
+  // console.log(req.files);
+
+  const tags: string[] = req.body.tag;
+  const title: string = req.body.title;
+  const content: string = req.body.title;
+  const files = req.files as Express.MulterS3.File[];
+  const imgUrls: string[] | null = files.length !== 0 ? files.map((data) => data.location) : null;
+  const price: number = Number(req.body.price);
+
+  //* TODO: 트랜잭션 처리 (Tag -> product -> product-tag)
+  //* TODO: 에러 발생시 이미지 삭제
 
 });
 
