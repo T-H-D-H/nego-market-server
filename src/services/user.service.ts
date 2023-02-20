@@ -134,3 +134,8 @@ export async function editUserInfo(userInfo: UserEditGet): Promise<UserMyPage> {
     return edited_user;
   }
 }
+
+export async function getUserIdByEmail(userEmail: string) {
+  const user = await userModel.getUserByEmail(userEmail);
+  return user.id;
+}

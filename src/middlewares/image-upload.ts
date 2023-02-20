@@ -39,6 +39,6 @@ export const upload = multer({
   //* 이미지 파일 확장자 필터
   fileFilter: fileFilter,
 
-  //* 파일 용량제한: 5MB
-  limits: { fileSize: 5 * 1024 * 1024 },
+  //* 파일 용량제한: 10MB
+  limits: { fileSize: 10 * 1024 * 1024 },
 });
