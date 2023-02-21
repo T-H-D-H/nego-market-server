@@ -1,4 +1,5 @@
 import * as productModel from '../db/product.model';
+import * as tagModel from '../db/tag.model';
 import * as userService from './user.service';
 
 export async function createProdcut(
@@ -10,4 +11,22 @@ export async function createProdcut(
     const newProduct =  await productModel.createProdcut(title, content, imgUrlsJson, price, userId, tags);
     
     return newProduct;
+}
+
+export async function getProductDetail(productId: number) {
+    const product = await productModel.getProductDetail(productId);
+    const tagName: {name: string}[] = await tagModel.getTagByProductId(productId);
+    const tagNameArr = tagName.map(data => data.name);
+
+    console.log(product);
+    console.log(tagNameArr);
+
+    const productInfo = {
+        ...product,
+        tagName: tagNameArr,
+    };
+
+    console.log(productInfo)
+
+    return product;
 }

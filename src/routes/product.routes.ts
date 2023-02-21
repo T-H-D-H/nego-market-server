@@ -23,16 +23,19 @@ productRouter.post("/product", loginRequired, upload.array("many", 3),  async (r
     //* TODO: 에러 발생시 이미지 삭제
     const newProduct = await productService.createProdcut(title, content, imgUrls, price, userEmail, tags);
     
+    res.status(201).send("SUCCESS");
   } catch(error) {
     next(error)
   }
 });
 
 productRouter.get("/product/:id", async (req, res, next) => {
-  const productId = req.params.id;
+  const productId = Number(req.params.id);
 
   try {
-    
+    const productDetail = await productService.getProductDetail(productId);
+
+    res.status(200).send(productDetail);
   } catch(error) {
     next(error);
   }

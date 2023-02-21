@@ -1,5 +1,6 @@
 import pool from "./index";
 
+//* TODO: 반환형 설정
 export async function createProdcut(
     title: string , content: string, imgUrls: string, price: number, userId: number, tags: string[]
 ) {
@@ -56,14 +57,26 @@ export async function createProdcut(
         
         return result[0][0];
     } catch (error) {
+        // ROLLBACK
         if (conn) {
             await conn.rollback();
         }
-
         throw error;
     } finally {
+        // RELEASE
         if (conn) {
             await conn.release();
         }
     }
+}
+
+//* TODO: 반환형 설정
+export async function getProductDetail(productId: number) {
+    const product = await pool.query(`
+        SELECT *
+        FROM product
+        WHERE id = ?`, [productId]
+    );
+
+    return product[0][0];
 }
