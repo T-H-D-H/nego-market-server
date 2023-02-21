@@ -1,7 +1,7 @@
 import pool from "./index";
 
 export async function createProdcut(
-    title: string , content: string, imgUrls: string[] | null, price: number, userId: number, tags: string[]
+    title: string , content: string, imgUrls: string, price: number, userId: number, tags: string[]
 ) {
     let conn: any = null;
     try {
@@ -10,32 +10,60 @@ export async function createProdcut(
         //* Transaction 시작
         await conn.beginTransaction();
 
-        //* 1. tag insert
-        tags.forEach(tag =>  conn.query(`
-            INSERT IGNORE INTO tag (name)
-            VALUES (?)`, [tag]
-        ))
+        //* 1. tag 추가
+        for (let i = 0; i < tags.length; ++i) {
+            await conn.query(`
+                INSERT IGNORE INTO tag(name)
+                VALUES (?)`, [tags[i]]
+            )
+        }
 
-        //* 2. product insert
-        conn.query(`
+        //* 2. product 추가
+        const newProduct = await conn.query(`
             INSERT INTO product (title, content, img, price, user_id)
-            VALUES (?,?,?,?,?)`, [title, content, [imgUrls], price, userId]
+            VALUES (?,?,?,?,?)`, [title, content, imgUrls, price, userId]
         )
-        
 
+        //* 3-1. tag id 가져오기
+        const tag_ids = [];
+        for (let i = 0; i < tags.length; ++i) {
+            let tag = await conn.query(`
+                SELECT id
+                FROM tag
+                WHERE name = ?`, [tags[i]]
+            )
 
+            tag_ids.push((tag[0][0]).id);
+        }
+    
+        //* 3-2. product-tag 추가
+        for (let i = 0; i < tag_ids.length; ++i) {
+            await conn.query(`
+                INSERT INTO product_tag (product_id, tag_id)
+                VALUES (?, ?)`, [newProduct[0].insertId, tag_ids[i]]
+            )
+        }        
 
-
-
-        //* 3. product-tag insert
+        //* 4. 새로 등록한 상품 가져오기
+        const result = await conn.query(`
+            SELECT *
+            FROM product
+            WHERE id = ?`, [newProduct[0].insertId]
+        )
 
         //* COMMIT
         await conn.commit();
+        
+        return result[0][0];
     } catch (error) {
-        //* ROLLBACK
-        if (conn) await conn.rollback();
+        if (conn) {
+            await conn.rollback();
+        }
+
         throw error;
     } finally {
-        if (conn) await conn.release();
+        if (conn) {
+            await conn.release();
+        }
     }
 }

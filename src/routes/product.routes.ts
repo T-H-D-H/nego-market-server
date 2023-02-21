@@ -8,13 +8,9 @@ import * as productService from "../services/product.service";
 
 const productRouter = Router();
 
-//* 사진 업로드는 3장으로 제한
 productRouter.post("/product", loginRequired, upload.array("many", 3),  async (req, res, next) => {
-  //* 저장된 이미지의 메타데이터
-  // console.log(req.files);
-
+  //* 사진 업로드는 3장으로 제한
   //* TODO: 입력값 검증
-  
   const title: string = req.body.title;
   const content: string = req.body.content;
   const files = req.files as Express.MulterS3.File[];
@@ -22,19 +18,24 @@ productRouter.post("/product", loginRequired, upload.array("many", 3),  async (r
   const price: number = Number(req.body.price);
   const userEmail:string = req.userEmail;
   const tags: string[] = req.body.tags.split(',');
-  
-  //* TODO: 트랜잭션 처리 (Tag -> product -> product-tag)
-  //* TODO: 에러 발생시 이미지 삭제
 
   try {
-    console.log(typeof imgUrls, imgUrls);
-    productService.createProdcut(title, content, imgUrls, price, userEmail, tags);
-
+    //* TODO: 에러 발생시 이미지 삭제
+    const newProduct = await productService.createProdcut(title, content, imgUrls, price, userEmail, tags);
+    
   } catch(error) {
     next(error)
   }
-  
-
 });
+
+productRouter.get("/product/:id", async (req, res, next) => {
+  const productId = req.params.id;
+
+  try {
+    
+  } catch(error) {
+    next(error);
+  }
+})
 
 export { productRouter };

@@ -5,7 +5,9 @@ export async function createProdcut(
     title: string , content: string, imgUrls: string[] | null, price: number, userEmail: string, tags: string[]
 ) {
     const userId = await userService.getUserIdByEmail(userEmail);
-    const newProduct =  await productModel.createProdcut(title, content, imgUrls, price, userId, tags);
+    const imgUrlsJson = JSON.stringify(imgUrls);
+
+    const newProduct =  await productModel.createProdcut(title, content, imgUrlsJson, price, userId, tags);
     
     return newProduct;
 }
