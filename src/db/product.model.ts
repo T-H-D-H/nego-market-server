@@ -1,6 +1,5 @@
 import pool from "./index";
 
-//* TODO: 반환형 설정
 export async function createProdcut(title: string, content: string, imgUrls: string, price: number, userId: number, tags: string[]) {
   let conn: any = null;
   try {
@@ -58,7 +57,6 @@ export async function createProdcut(title: string, content: string, imgUrls: str
     //* COMMIT
     await conn.commit();
 
-    return result[0][0];
   } catch (error) {
     //* ROLLBACK
     if (conn) {

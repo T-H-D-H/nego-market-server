@@ -21,7 +21,7 @@ productRouter.post("/product", loginRequired, upload.array("many", 3),  async (r
 
   try {
     //* TODO: 에러 발생시 이미지 삭제
-    const newProduct = await productService.createProdcut(title, content, imgUrls, price, userEmail, tags);
+    await productService.createProdcut(title, content, imgUrls, price, userEmail, tags);
     
     res.status(201).send("SUCCESS");
   } catch(error) {
