@@ -1,12 +1,13 @@
 import "dotenv/config";
 import { Router, Request, Response, NextFunction } from "express";
-import { isEmpty } from "../utils/object-empty-check";
 import { loginRequired } from "../middlewares/login-required";
 import { upload } from "../middlewares/image-upload";
 import * as userService from "../services/user.service";
 import * as productService from "../services/product.service";
 import { validationResult } from "express-validator";
 import { createProdcutValidator } from "../middlewares/validation-check";
+import { User } from "types/user";
+
 
 const productRouter = Router();
 
@@ -33,7 +34,7 @@ const productRouter = Router();
  *        description: Bad Request
  */
 productRouter.post("/product", loginRequired, upload.array("imgs", 3), createProdcutValidator, async (req: Request, res: Response, next: NextFunction) => {
-  try {    
+  try {
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
@@ -57,11 +58,42 @@ productRouter.post("/product", loginRequired, upload.array("imgs", 3), createPro
   }
 });
 
-productRouter.get("/product/:id", async (req, res, next) => {
-  const productId = Number(req.params.id);
-
+/**
+ * @openapi
+ * '/api/product/{id}':
+ *  get:
+ *   tags:
+ *     - Product
+ *   summary: Get product detail page
+ *   security:
+ *     - bearerAuth: []
+ *   description: ※로그인 한 유저만 사용할 수 있습니다. 토큰을 입력해 주세요.<br><br> 해당 상품 ID에 대한 상품 상세 정보를 조회합니다.
+ *   parameters:
+ *     - name: id
+ *       in: path
+ *       description: 조회하고자 하는 상품의 ID
+ *       required: true
+ *       default: 62
+ *       schema:
+ *         type: integer
+ *   responses:
+ *     '200':
+ *       description: 상품 정보 조회 성공
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ProductDetail'
+ *     '400':
+ *       description: Bad Request
+ */
+productRouter.get("/product/:id", loginRequired, async (req, res, next) => {
   try {
-    const productDetail = await productService.getProductDetail(productId);
+    const productId = Number(req.params.id);
+
+    // 로그인 한 유저의 ID 취득, 요청 주체가 좋아요를 눌렀는지 확인하기 위함
+    const email: string = req.userEmail;
+    const user: User = await userService.getUserByEmail(email);
+    const productDetail = await productService.getProductDetail(productId, user.id);
 
     res.status(200).send(productDetail);
   } catch (error) {

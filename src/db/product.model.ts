@@ -83,3 +83,27 @@ export async function getProductDetail(productId: number) {
 
   return product[0][0];
 }
+
+export async function getLikedCountByProductId(productId: number) {
+  const [likedCount] = await pool.query(
+    `SELECT COUNT(*) AS count
+     FROM liked
+     WHERE product_id = ?`,
+    [productId]
+  );
+
+  return likedCount[0].count;
+}
+
+//* 상품 ID, 요청한 유저 ID로 좋아요를 눌렀는지 확인. 눌렀으면 1, 누르지 않았으면 0을 반환
+export async function hasLiked(productId: number, reqUserId: number) {
+  const [likedCount] = await pool.query(
+    `SELECT COUNT(*) AS count
+     FROM liked
+     WHERE product_id = ?
+     AND user_id = ?`,
+    [productId, reqUserId]
+  );
+
+  return likedCount[0].count;
+}
