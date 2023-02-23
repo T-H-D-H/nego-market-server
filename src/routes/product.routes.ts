@@ -5,6 +5,8 @@ import { loginRequired } from "../middlewares/login-required";
 import { upload } from "../middlewares/image-upload";
 import * as userService from "../services/user.service";
 import * as productService from "../services/product.service";
+import { validationResult } from "express-validator";
+import { createProdcutValidator } from "../middlewares/validation-check";
 
 const productRouter = Router();
 
@@ -30,17 +32,22 @@ const productRouter = Router();
  *      400:
  *        description: Bad Request
  */
-productRouter.post("/product", loginRequired, upload.array("imgs", 3), async (req, res, next) => {
-  //* TODO: 입력값 검증
-  const title: string = req.body.title;
-  const content: string = req.body.content;
-  const files = req.files as Express.MulterS3.File[];
-  const imgUrls: string[] = files.length !== 0 ? files.map((data) => data.location) : [];
-  const price: number = Number(req.body.price);
-  const userEmail: string = req.userEmail;
-  const tags: string[] = req.body.tags.split(",");
+productRouter.post("/product", loginRequired, upload.array("imgs", 3), createProdcutValidator, async (req: Request, res: Response, next: NextFunction) => {
+  try {    
+    const errors = validationResult(req);
 
-  try {
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() }); 
+    }
+
+    const title: string = req.body.title;
+    const content: string = req.body.content;
+    const files = req.files as Express.MulterS3.File[];
+    const imgUrls: string[] = files.length !== 0 ? files.map((data) => data.location) : [];
+    const price: number = Number(req.body.price);
+    const userEmail: string = req.userEmail;
+    const tags: string[] = req.body.tags;
+    
     //* TODO: 에러 발생시 이미지 삭제
     await productService.createProdcut(title, content, imgUrls, price, userEmail, tags);
 
