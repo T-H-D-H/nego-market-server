@@ -124,3 +124,87 @@ export async function getAllProducts() {
 
   return products;
 }
+
+export async function getAllProductsByUserAddress(si: string, gu: string, dong: string) {
+  const [products] = await pool.query(
+    `SELECT P.id, P.user_id, P.img, P.title, COUNT(L.product_id) AS like_count, A.si, A.gu, A.dong
+    FROM product P
+    LEFT JOIN liked L ON P.id = L.product_id
+        ,user U
+        ,address A
+    WHERE P.user_id = U.id
+    AND U.address_id = A.id
+    GROUP BY P.id
+    ORDER BY
+     CASE 
+      WHEN A.si = ? AND A.gu = ? AND A.dong =? THEN 1
+        WHEN A.si = ? AND A.gu = ? AND A.dong != ? THEN 2
+        WHEN A.si = ? AND A.gu != ? THEN 3
+        WHEN A.si != ? THEN 4
+     END
+     ,like_count DESC;`,
+    [si, gu, dong, si, gu, dong, si, gu, si]
+  );
+
+  return products;
+}
+
+export async function getAllProductsByUserAddressSi(si: string) {
+  const [products] = await pool.query(
+    `SELECT P.id, P.user_id, P.img, P.title, COUNT(L.product_id) AS like_count, A.si, A.gu, A.dong
+    FROM product P
+    LEFT JOIN liked L ON P.id = L.product_id
+        ,user U
+        ,address A
+    WHERE P.user_id = U.id
+    AND U.address_id = A.id
+    AND A.si = ?
+    GROUP BY P.id
+    ORDER BY
+     like_count DESC;`,
+    [si]
+  );
+
+  return products;
+}
+
+export async function getAllProductsByUserAddressSiGu(si: string, gu: string) {
+  const [products] = await pool.query(
+    `SELECT P.id, P.user_id, P.img, P.title, COUNT(L.product_id) AS like_count, A.si, A.gu, A.dong
+    FROM product P
+    LEFT JOIN liked L ON P.id = L.product_id
+        ,user U
+        ,address A
+    WHERE P.user_id = U.id
+    AND U.address_id = A.id
+    AND A.si = ?
+    AND A.gu = ?
+    GROUP BY P.id
+    ORDER BY
+     like_count DESC;`,
+    [si, gu]
+  );
+
+  return products;
+}
+
+export async function getAllProductsByUserAddressSiGuDong(si: string, gu: string, dong: string) {
+  const [products] = await pool.query(
+    `SELECT P.id, P.user_id, P.img, P.title, COUNT(L.product_id) AS like_count, A.si, A.gu, A.dong
+    FROM product P
+    LEFT JOIN liked L ON P.id = L.product_id
+        ,user U
+        ,address A
+    WHERE P.user_id = U.id
+    AND U.address_id = A.id
+    AND A.si = ?
+    AND A.gu = ?
+    AND A.dong = ?
+    GROUP BY P.id
+    ORDER BY
+     like_count DESC;`,
+    [si, gu, dong]
+  );
+
+  return products;
+}

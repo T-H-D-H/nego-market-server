@@ -1,5 +1,6 @@
 import * as productModel from "../db/product.model";
 import * as tagModel from "../db/tag.model";
+import * as addressModel from "../db/address.model";
 import * as userService from "./user.service";
 
 //* 상품 업로드
@@ -33,9 +34,7 @@ export async function getProductDetail(productId: number, reqUserId: number) {
   return productInfo;
 }
 
-export async function getAllProducts() {
-  const products = await productModel.getAllProducts();
-
+export function parseAllProducts(products: any) {
   for (let i = 0; i < products.length; ++i) {
     let img: string = products[i].img.length == 0 ? "" : products[i].img[0];
     const address_name = `${products[i].si} ${products[i].gu} ${products[i].dong}`;
@@ -54,4 +53,34 @@ export async function getAllProducts() {
   }
 
   return products;
+}
+
+export async function getAllProducts() {
+  const products = await productModel.getAllProducts();
+  return parseAllProducts(products);
+}
+
+export async function getAllProductsByUserAddress(address_id: number) {
+  const address = await addressModel.getAddressById(address_id);
+  const products = await productModel.getAllProductsByUserAddress(address.si, address.gu, address.dong);
+
+  return parseAllProducts(products);
+}
+
+export async function getAllProductsByUserAddressSi(si: string) {
+  const products = await productModel.getAllProductsByUserAddressSi(si);
+
+  return parseAllProducts(products);
+}
+
+export async function getAllProductsByUserAddressSiGu(si: string, gu: string) {
+  const products = await productModel.getAllProductsByUserAddressSiGu(si, gu);
+
+  return parseAllProducts(products);
+}
+
+export async function getAllProductsByUserAddressSiGuDong(si: string, gu: string, dong: string) {
+  const products = await productModel.getAllProductsByUserAddressSiGuDong(si, gu, dong);
+
+  return parseAllProducts(products);
 }
