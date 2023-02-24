@@ -33,14 +33,14 @@ export const signupValidator = [
     .withMessage("이메일은 5~64자 사이로 입력해 주세요."),
 
   // check Password
-  check("password")
-    .trim()
-    .notEmpty()
-    .custom((val) => {
-      const reg = /^(?=.*[a-zA-Z0-9])((?=.*\W)).{8,16}$/;
-      return reg.test(val);
-    })
-    .withMessage("비밀번호는 8~16자 이내, 특수문자를 한 개 이상 입력해 주세요."),
+    check("password")
+      .trim()
+      .notEmpty()
+      .custom((val) => {
+        const reg = /^(?=.*[a-zA-Z0-9])((?=.*\W)).{8,16}$/;
+        return reg.test(val);
+      })
+      .withMessage("비밀번호는 8~16자 이내, 특수문자를 한 개 이상 입력해 주세요."),
 
   // check tell
   check("tel")
@@ -56,3 +56,46 @@ export const signupValidator = [
   // check address
   check("address").notEmpty().withMessage("주소는 필수값입니다."),
 ];
+
+export const createProdcutValidator = [
+  check("title")
+    .trim()
+    .notEmpty()
+    .withMessage("제목은 필수값입니다."),
+
+  check("content")
+    .trim()
+    .notEmpty()
+    .withMessage("본문은 필수값입니다."),
+
+  check("price")
+    .trim()
+    .notEmpty()
+    .withMessage("가격은 필수값입니다."),
+
+  check("tags")
+    .trim()
+    .custom(val => {
+      const tagsArr = val.split(',');
+      return val != "" && tagsArr.length > 0 && tagsArr.length < 11;
+    })
+    .withMessage("태그는 최소 1개 ~ 10개 이하로 입력해 주세요.")
+    .customSanitizer(value => {
+      // 쉼표로 구분된 문자열을 배열로 분할
+      return value.split(',');
+    })
+    .custom((value: string[])=> {
+      const values = value.map(str => str.trim());
+      const emptyValues = values.filter(str => !str);
+  
+      if (emptyValues.length > 0) {
+        throw new Error('각 요소는 비어 있을 수 없습니다.');
+      }
+  
+      // 처리된 배열 반환
+      return values;
+    })
+    .customSanitizer((value: string[]) => {
+      return value.map(str => str.trim())
+    })
+]
