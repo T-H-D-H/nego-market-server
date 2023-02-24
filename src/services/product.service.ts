@@ -16,7 +16,7 @@ export async function getProductDetail(productId: number, reqUserId: number) {
   const tagNameArr = tagName.map((data) => data.name);
 
   delete product.created_at;
-  
+
   const likedCount: number = await productModel.getLikedCountByProductId(productId);
   const reqUserLiked = await productModel.hasLiked(productId, reqUserId);
 
@@ -24,11 +24,34 @@ export async function getProductDetail(productId: number, reqUserId: number) {
   //* TODO: 댓글 정보 넣기 (댓글 기능 구현 후)
   const productInfo = {
     ...product,
-    last_updated_at: product.last_updated_at.toLocaleString("ja-JP", {timeZone: "Asia/Seoul"}),
+    last_updated_at: product.last_updated_at.toLocaleString("ja-JP", { timeZone: "Asia/Seoul" }),
     tagName: tagNameArr,
     likedCount: likedCount,
     hasReqUserLiked: reqUserLiked === 0 ? false : true,
   };
 
   return productInfo;
+}
+
+export async function getAllProducts() {
+  const products = await productModel.getAllProducts();
+
+  for (let i = 0; i < products.length; ++i) {
+    let img: string = products[i].img.length == 0 ? "" : products[i].img[0];
+    const address_name = `${products[i].si} ${products[i].gu} ${products[i].dong}`;
+
+    delete products[i].si;
+    delete products[i].gu;
+    delete products[i].dong;
+
+    //* TODO: 댓글 구현 후, 올바른 댓글 갯수 불러오기
+    products[i] = {
+      ...products[i],
+      img: img,
+      address: address_name,
+      comment: 0,
+    };
+  }
+
+  return products;
 }

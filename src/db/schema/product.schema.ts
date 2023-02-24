@@ -85,4 +85,44 @@
  *        hasReqUserLiked:
  *          type: boolean
  *          description: 요청한 유저가 좋아요를 눌렀는지 여부
+ *    GetProductsByLikes:
+ *      type: array
+ *      items:
+ *        type: object
+ *        required:
+ *          - id
+ *          - user_id
+ *          - img
+ *          - title
+ *          - price
+ *          - like_count
+ *          - address
+ *          - comment
+ *        properties:
+ *          id:
+ *            type: integer
+ *            format: int64
+ *            description: Product ID
+ *          user_id:
+ *            type: integer
+ *            format: int64
+ *            description: User ID of the seller
+ *          img:
+ *            type: string
+ *            description: Image URL of the product
+ *          title:
+ *            type: string
+ *            description: Title of the product
+ *          price:
+ *            type: integer
+ *            description: Price of the product
+ *          like_count:
+ *            type: integer
+ *            description: Number of likes of the product
+ *          address:
+ *            type: string
+ *            description: Address of the product
+ *          comment:
+ *            type: integer
+ *            description: Number of comments of the product
  */

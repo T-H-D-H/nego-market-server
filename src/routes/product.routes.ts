@@ -8,7 +8,6 @@ import { validationResult } from "express-validator";
 import { createProdcutValidator } from "../middlewares/validation-check";
 import { User } from "types/user";
 
-
 const productRouter = Router();
 
 /**
@@ -33,30 +32,36 @@ const productRouter = Router();
  *      400:
  *        description: Bad Request
  */
-productRouter.post("/product", loginRequired, upload.array("imgs", 3), createProdcutValidator, async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const errors = validationResult(req);
+productRouter.post(
+  "/product",
+  loginRequired,
+  upload.array("imgs", 3),
+  createProdcutValidator,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const errors = validationResult(req);
 
-    if (!errors.isEmpty()) {
-      return res.status(422).json({ errors: errors.array() }); 
+      if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+      }
+
+      const title: string = req.body.title;
+      const content: string = req.body.content;
+      const files = req.files as Express.MulterS3.File[];
+      const imgUrls: string[] = files.length !== 0 ? files.map((data) => data.location) : [];
+      const price: number = Number(req.body.price);
+      const userEmail: string = req.userEmail;
+      const tags: string[] = req.body.tags;
+
+      //* TODO: 에러 발생시 이미지 삭제
+      await productService.createProdcut(title, content, imgUrls, price, userEmail, tags);
+
+      res.status(201).send("SUCCESS");
+    } catch (error) {
+      next(error);
     }
-
-    const title: string = req.body.title;
-    const content: string = req.body.content;
-    const files = req.files as Express.MulterS3.File[];
-    const imgUrls: string[] = files.length !== 0 ? files.map((data) => data.location) : [];
-    const price: number = Number(req.body.price);
-    const userEmail: string = req.userEmail;
-    const tags: string[] = req.body.tags;
-    
-    //* TODO: 에러 발생시 이미지 삭제
-    await productService.createProdcut(title, content, imgUrls, price, userEmail, tags);
-
-    res.status(201).send("SUCCESS");
-  } catch (error) {
-    next(error);
   }
-});
+);
 
 /**
  * @openapi
@@ -96,6 +101,35 @@ productRouter.get("/product/:id", loginRequired, async (req, res, next) => {
     const productDetail = await productService.getProductDetail(productId, user.id);
 
     res.status(200).send(productDetail);
+  } catch (error) {
+    next(error);
+  }
+});
+
+//* 좋아요가 많은 순서대로 전체 상품 정보(id, user_id, img, title, price, like_count, address, comment)를 반환
+/**
+ * @openapi
+ * '/api/products':
+ *  get:
+ *    tags:
+ *      - Product
+ *    summary: 모든 상품을 좋아요 순으로 가져오기
+ *    description: 모든 상품을 좋아요 순으로 정렬하여 반환합니다.
+ *    responses:
+ *      '200':
+ *        description: 상품 정보 조회 성공
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/GetProductsByLikes'
+ *      '400':
+ *        description: Bad Request
+ */
+productRouter.get("/products", async (req, res, next) => {
+  try {
+    const products = await productService.getAllProducts();
+
+    res.status(200).send(products);
   } catch (error) {
     next(error);
   }
