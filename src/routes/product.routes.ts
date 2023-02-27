@@ -91,7 +91,7 @@ productRouter.post(
  *     '400':
  *       description: Bad Request
  */
-productRouter.get("/product/:id", loginRequired, async (req, res, next) => {
+productRouter.get("/product/:id", loginRequired, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const productId = Number(req.params.id);
 
@@ -125,7 +125,7 @@ productRouter.get("/product/:id", loginRequired, async (req, res, next) => {
  *      '400':
  *        description: Bad Request
  */
-productRouter.get("/products", async (req, res, next) => {
+productRouter.get("/products", async (req: Request, res: Response, next: NextFunction) => {
   try {
     const products = await productService.getAllProducts();
 
@@ -135,7 +135,7 @@ productRouter.get("/products", async (req, res, next) => {
   }
 });
 
-// 로그인한 유저의 주소 (동 > 구 > 시)의 우선순위로 전체 상품 리스트 조회
+// 전체 상품 리스트 조회 - 로그인한 유저의 주소 (동 > 구 > 시)의 우선순위
 /**
  * @openapi
  * '/api/products/my-address':
@@ -156,7 +156,7 @@ productRouter.get("/products", async (req, res, next) => {
  *      '400':
  *        description: Bad Request
  */
-productRouter.get("/products/my-address", loginRequired, async (req, res, next) => {
+productRouter.get("/products/my-address", loginRequired, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user: User = await userService.getUserByEmail(req.userEmail);
     const products = await productService.getAllProductsByUserAddress(user.address_id);
@@ -167,7 +167,7 @@ productRouter.get("/products/my-address", loginRequired, async (req, res, next) 
   }
 });
 
-// path 파라미터로 전달받은 시에 해당하는  전체 상품 리스트 조회
+// 전체 상품 리스트 조회 - path 파라미터로 전달받은 시에 해당하는 전체 상품
 /**
  * @openapi
  * '/api/products/{si}':
@@ -194,7 +194,7 @@ productRouter.get("/products/my-address", loginRequired, async (req, res, next) 
  *      '400':
  *        description: Bad Request
  */
-productRouter.get("/products/:si", async (req, res, next) => {
+productRouter.get("/products/:si", async (req: Request, res: Response, next: NextFunction) => {
   try {
     const si = req.params.si;
     const products = await productService.getAllProductsByUserAddressSi(si);
@@ -205,7 +205,7 @@ productRouter.get("/products/:si", async (req, res, next) => {
   }
 });
 
-// path 파라미터로 전달받은 시/구에 해당하는 전체 상품 리스트 조회
+// 전체 상품 리스트 조회 - path 파라미터로 전달받은 시/구에 해당하는 전체 상품
 /**
  * @openapi
  * '/api/products/{si}/{gu}':
@@ -239,7 +239,7 @@ productRouter.get("/products/:si", async (req, res, next) => {
  *      '400':
  *        description: Bad Request
  */
-productRouter.get("/products/:si/:gu", async (req, res, next) => {
+productRouter.get("/products/:si/:gu", async (req: Request, res: Response, next: NextFunction) => {
   try {
     const si = req.params.si;
     const gu = req.params.gu;
@@ -251,14 +251,14 @@ productRouter.get("/products/:si/:gu", async (req, res, next) => {
   }
 });
 
-// path 파라미터로 전달받은 시/구/동에 해당하는 전체 상품 리스트 조회
+// 전체 상품 리스트 조회 - path 파라미터로 전달받은 시/구/동에 해당하는 전체 상품
 /**
  * @openapi
  * '/api/products/{si}/{gu}/{dong}':
  *  get:
  *    tags:
  *      - Product
- *    summary: 시/구로 전체 상품 가져오기
+ *    summary: 시/구/동에 해당하는 전체 상품 가져오기
  *    description: 파라미터로 전달받은 시/구로 전체 상품 리스트 조회
  *    parameters:
  *     - name: si
@@ -292,7 +292,7 @@ productRouter.get("/products/:si/:gu", async (req, res, next) => {
  *      '400':
  *        description: Bad Request
  */
-productRouter.get("/products/:si/:gu/:dong", async (req, res, next) => {
+productRouter.get("/products/:si/:gu/:dong", async (req: Request, res: Response, next: NextFunction) => {
   try {
     const si = req.params.si;
     const gu = req.params.gu;
@@ -304,5 +304,45 @@ productRouter.get("/products/:si/:gu/:dong", async (req, res, next) => {
     next(error);
   }
 });
+
+// 상품 삭제
+/**
+ * @swagger
+ * /api/product/{id}:
+ *   delete:
+ *     tags:
+ *      - Product
+ *     summary: 상품 ID로 상품 삭제
+ *     description: 상품 ID로 상품 삭제
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: 삭제할 상품의 ID를 입력해 주세요.
+ *     responses:
+ *       200:
+ *         description: 삭제 성공
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *               example: SUCCESS
+ *       400:
+ *         description: Bad Request
+ */
+
+productRouter.delete("/product/:id", loginRequired, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const productId = Number(req.params.id);
+    await productService.deleteProduct(productId);
+
+    res.status(200).send('SUCCESS');
+  } catch (error) {
+    next(error);
+  }
+})
+
 
 export { productRouter };

@@ -84,3 +84,13 @@ export async function getAllProductsByUserAddressSiGuDong(si: string, gu: string
 
   return parseAllProducts(products);
 }
+
+export async function deleteProduct(productId: number): Promise<void> {
+//* 유효하지 않은 상품 ID의 경우 예외 처리
+  const product = await productModel.getProductDetail(productId);
+  if (!product) {
+    throw new Error('유효하지 않은 상품 ID 입니다.');
+  }
+
+  await productModel.deleteProduct(productId);
+}
