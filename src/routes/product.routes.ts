@@ -7,6 +7,7 @@ import * as productService from "../services/product.service";
 import { validationResult } from "express-validator";
 import { createProdcutValidator } from "../middlewares/validation-check";
 import { User } from "types/user";
+import { nextToken } from "aws-sdk/clients/health";
 
 const productRouter = Router();
 
@@ -344,5 +345,63 @@ productRouter.delete("/product/:id", loginRequired, async (req: Request, res: Re
   }
 })
 
+// 상품 (제목, 본문, 가격) 수정
+/**
+ * @openapi
+ *  '/api/product/{id}':
+ *   patch:
+ *     summary: 상품 수정
+ *     description: 상품 제목, 본문, 가격 수정
+ *     tags:
+ *       - Product
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         description: 상품 ID
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *        required: true
+ *        content:
+ *          application/json:
+ *            schema:
+ *              type: object
+ *              properties:
+ *                title:
+ *                  type: string
+ *                content:
+ *                  type: string
+ *                price:
+ *                  type: number
+ *     responses:
+ *       '200':
+ *         description: Updated product information
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ProductDetail'
+ *       '400':
+ *         description: Bad Request
+ */
+productRouter.patch("/product/:id", loginRequired, async (req: Request, res: Response, next: NextFunction) => {
+  const {title, content, price} = req.body as { title: string, content: string, price: number };
+  const productId = Number(req.params.id);
+
+  try {
+    // * 상품 update
+    await productService.updateProduct(productId, title, content, price);
+
+    //* 업데이트 한 상품 정보 조회
+    const user: User = await userService.getUserByEmail(req.userEmail);
+    const updatedProductDetail = await productService.getProductDetail(productId, user.id);
+    
+    res.status(200).send(updatedProductDetail);
+  } catch (error) {
+    next(error)
+  }
+})
 
 export { productRouter };
