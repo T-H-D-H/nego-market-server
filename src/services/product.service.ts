@@ -94,3 +94,16 @@ export async function deleteProduct(productId: number): Promise<void> {
 
   await productModel.deleteProduct(productId);
 }
+
+export async function updateProduct(productId: number, title: string, content: string, price: number) {
+  const product = await productModel.getProductDetail(productId);
+
+  // * params로 넘겨받은 상품 ID 가 올바르지 않은 경우
+  if (!product) {
+    throw new Error('상품이 존재하지 않습니다.');
+  }
+
+  // * 상품 업데이트
+  await productModel.updateProduct(productId, title, content, price);
+  
+}
