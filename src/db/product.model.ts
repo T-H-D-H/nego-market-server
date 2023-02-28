@@ -208,3 +208,51 @@ export async function getAllProductsByUserAddressSiGuDong(si: string, gu: string
 
   return products;
 }
+
+export async function deleteProduct(productId: number) {
+  let conn: any = null;
+  try {
+    conn = await pool.getConnection();
+
+    //* Transaction 시작
+    await conn.beginTransaction();
+
+    //* 1. 좋아요 레코드 삭제
+    await conn.query(
+      `DELETE FROM liked
+       WHERE product_id = ?`,
+       [productId]
+    );
+    
+    //* 2. 상품-태그 레코드 삭제
+    await conn.query(
+      `DELETE FROM product_tag
+       WHERE product_id = ?`,
+       [productId]
+    );
+
+    //* 3. TODO: 댓글이 존재하는 경우, 댓글도 삭제 (댓글 구현 후)
+    
+    //* 4. 상품 레코드 삭제
+    await conn.query(
+      `DELETE FROM product
+       WHERE id = ?`,
+       [productId]
+    );
+
+    //* COMMIT
+    await conn.commit();
+  } catch (error) {
+    //* ROLLBACK
+    if (conn) {
+      await conn.rollback();
+    }
+
+    throw error;
+  } finally {
+    //* RELEASE
+    if (conn) {
+      await conn.release();
+    }
+  }
+}
