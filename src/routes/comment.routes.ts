@@ -12,6 +12,7 @@ commentRouter.post('/comment', loginRequired, async (req: Request, res: Response
 
     try {
         const user = await userService.getUserByEmail(userEmail);
+        
         // * create comment
         await commentService.createComment(content, user.id, productID);
         
@@ -29,6 +30,7 @@ commentRouter.post('/reply', loginRequired, async (req: Request, res: Response, 
 
     try {
         const user = await userService.getUserByEmail(userEmail);
+
         // * create reply
         await commentService.createReply(content, user.id, productID, parentID);
         
@@ -40,10 +42,25 @@ commentRouter.post('/reply', loginRequired, async (req: Request, res: Response, 
 })
 
 // * 댓글 삭제
-commentRouter.delete('/comment/:comment_id', loginRequired, async (req: Request, res: Response, next: NextFunction) => {
+commentRouter.patch('/comment/:comment_id', loginRequired, async (req: Request, res: Response, next: NextFunction) => {
+    const deletedMessage = '작성자에 의해 삭제된 댓글입니다.';
+    const userEmail = req.userEmail;
+    
     try {
+        const commentID = Number(req.params.comment_id);
 
-        res.status(204).send('OK');
+        // * 요청한 유저가 댓글 작성자가 아닌 경우 예외처리
+        const comment = await commentService.getCommentById(commentID);
+        const user = await userService.getUserByEmail(userEmail);
+
+        if (comment.user_id !== user.id) {
+            throw new Error('작성자만 댓글을 삭제할 수 있습니다.')
+        }
+
+        // * 댓글 삭제
+        await commentService.deleteComment(deletedMessage, commentID);
+
+        res.status(201).send('OK');
     } catch (error) {
         next (error)
     }

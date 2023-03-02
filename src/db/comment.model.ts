@@ -17,3 +17,25 @@ export async function createReply(content: string, userID: number, productID: nu
          ,[content, userID, productID, parentID]
     )
 }
+
+// * 댓글,대댓글 삭제
+export async function deleteComment(deletedMessage: string, commentID: number) {
+    await pool.query(
+        `UPDATE comment
+         SET content = ?
+         WHERE id = ?`
+         ,[deletedMessage, commentID]
+    )
+}
+
+// * 댓글 id로 댓글 조회
+export async function getCommentById(commentID: number) {
+    const [result] = await pool.query(
+        `SELECT *
+         FROM comment
+         WHERE id = ?`
+         ,[commentID]
+    )
+
+    return result[0];
+}
