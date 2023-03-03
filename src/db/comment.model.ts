@@ -39,3 +39,15 @@ export async function getCommentById(commentID: number) {
 
     return result[0];
 }
+
+// * 댓글 조회
+export async function getCommentsByProductID(productID: number) {
+    const [result] = await pool.query(
+        `SELECT *
+         FROM comment
+         WHERE product_id = ?`
+         ,[productID]
+    )
+
+    return result;
+}

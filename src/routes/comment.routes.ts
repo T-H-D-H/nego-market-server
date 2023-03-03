@@ -91,4 +91,18 @@ commentRouter.patch('/comment', loginRequired, async (req: Request, res: Respons
     }
 })
 
+// * 댓글 조회
+commentRouter.get('/comments/:product_id', async (req: Request, res: Response, next: NextFunction) => {
+    
+    try {
+        const productID = Number(req.params.product_id);
+
+        await commentService.getCommentsByProductID(productID);
+
+        res.status(200).send();
+    } catch (error) {
+        next (error)
+    }
+})
+
 export { commentRouter };

@@ -25,7 +25,7 @@ export async function getProductDetail(productId: number, reqUserId: number) {
   //* TODO: 댓글 정보 넣기 (댓글 기능 구현 후)
   const productInfo = {
     ...product,
-    last_updated_at: product.last_updated_at.toLocaleString("ja-JP", { timeZone: "Asia/Seoul" }),
+    //last_updated_at: product.last_updated_at.toLocaleString("ja-JP", { timeZone: "Asia/Seoul" }),
     tagName: tagNameArr,
     likedCount: likedCount,
     hasReqUserLiked: reqUserLiked === 0 ? false : true,

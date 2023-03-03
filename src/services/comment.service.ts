@@ -26,3 +26,21 @@ export async function getCommentById(commentID: number) {
 export async function updateComment(updatedMessage: string, commentID: number) {
     await commentModel.updateComment(updatedMessage, commentID);
 }
+
+// * 댓글 데이터 파싱
+export function parseComments(comments: {id: number, content: string}[]) {
+    const parsedComment = [];
+
+    comments.forEach(comment => {
+        
+    });
+    
+}
+
+// * 댓글 조회
+export async function getCommentsByProductID(productID: number) {
+    const comments = await commentModel.getCommentsByProductID(productID);
+
+    return comments;
+    
+}
