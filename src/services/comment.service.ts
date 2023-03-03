@@ -12,7 +12,7 @@ export async function createReply(content: string, userID: number, productID: nu
 
 // * 댓글, 대댓글 삭제
 export async function deleteComment(deletedMessage: string, commentID: number) {
-    await commentModel.deleteComment(deletedMessage, commentID);
+    await commentModel.updateComment(deletedMessage, commentID);
 }
 
 // * 댓글 id로 댓글 조회
@@ -20,4 +20,9 @@ export async function getCommentById(commentID: number) {
     const comment = await commentModel.getCommentById(commentID);
 
     return comment;
+}
+
+// * 댓글, 대댓글 수정
+export async function updateComment(updatedMessage: string, commentID: number) {
+    await commentModel.updateComment(updatedMessage, commentID);
 }

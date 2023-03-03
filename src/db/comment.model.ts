@@ -18,13 +18,13 @@ export async function createReply(content: string, userID: number, productID: nu
     )
 }
 
-// * 댓글,대댓글 삭제
-export async function deleteComment(deletedMessage: string, commentID: number) {
+// * 댓글,대댓글 수정, 삭제
+export async function updateComment(updatedMessage: string, commentID: number) {
     await pool.query(
         `UPDATE comment
          SET content = ?
          WHERE id = ?`
-         ,[deletedMessage, commentID]
+         ,[updatedMessage, commentID]
     )
 }
 
