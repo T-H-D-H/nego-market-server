@@ -1,4 +1,5 @@
 import * as commentModel from '../db/comment.model';
+import { Comments, ParsedComment, ParsedChildComment } from '../types/comment';
 
 // * 댓글 등록
 export async function createComment(content: string, userID: number, productID: number) {
@@ -27,20 +28,40 @@ export async function updateComment(updatedMessage: string, commentID: number) {
     await commentModel.updateComment(updatedMessage, commentID);
 }
 
-// * 댓글 데이터 파싱
-export function parseComments(comments: {id: number, content: string}[]) {
-    const parsedComment = [];
-
-    comments.forEach(comment => {
-        
-    });
-    
-}
-
 // * 댓글 조회
 export async function getCommentsByProductID(productID: number) {
-    const comments = await commentModel.getCommentsByProductID(productID);
+    const results: Comments[] = await commentModel.getCommentsByProductID(productID);
 
-    return comments;
-    
+    // 결과 파싱
+    const comments = results.reduce((acc: ParsedComment[], cur: Comments) => {
+        // 부모 댓글이 새로 나타났을 때, 새로운 객체를 생성하여 배열에 추가
+        if (!acc[cur.id]) {
+            acc[cur.id] = {
+                id: cur.id,
+                comment: cur.comment,
+                user_id: cur.user_id,
+                created_at: cur.created_at,
+                updated_at: cur.updated_at,
+                child_comment: []
+            };
+        }
+
+        // 자식 댓글이 존재하는 경우, 부모 댓글 객체의 child_comment 배열에 추가
+        if (cur.child_id) {
+            acc[cur.id].child_comment.push({
+                id: cur.child_id,
+                comment: cur.child_comment,
+                user_id: cur.child_user_id,
+                created_at: cur.child_created_at,
+                updated_at: cur.child_updated_at
+            });
+        }
+
+        return acc;
+    }, []);
+
+    // 배열에서 null 값이 존재하는 경우 제거
+    const nonNullComments = comments.filter(comment => !(comment == null))
+
+    return nonNullComments;
 }
