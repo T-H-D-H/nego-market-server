@@ -7,7 +7,6 @@ import * as productService from "../services/product.service";
 import { validationResult } from "express-validator";
 import { createProdcutValidator } from "../middlewares/validation-check";
 import { User } from "types/user";
-import { nextToken } from "aws-sdk/clients/health";
 
 const productRouter = Router();
 
