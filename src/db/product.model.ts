@@ -258,46 +258,12 @@ export async function deleteProduct(productId: number) {
 }
 
 export async function updateProduct(productId: number, title: string, content: string, price: number) {
-  let conn: any = null;
-  try {
-    conn = await pool.getConnection();
-
-    //* Transaction 시작
-    await conn.beginTransaction();
-
-    //* 1. 제목 수정
-    await conn.query(
+  await pool.query(
       `UPDATE product
-        SET title = ?
-        WHERE id = ?`
-      ,[title, productId]
-    )
-    //* 2. 본문 수정
-    await conn.query(
-      `UPDATE product
-       SET content = ?
+       SET  title = ?
+          , content = ?
+          , price = ?
        WHERE id = ?` 
-      ,[content, productId]
-    )
-    //* 3. price 수정
-    await conn.query(
-      `UPDATE product
-       SET price = ?
-       WHERE id = ?` 
-      ,[price, productId]
-    )
-
-    //* commit
-    await conn.commit();
-  } catch (error) {
-    if (conn) {
-      await conn.rollback();
-    }
-
-    throw error;
-  } finally {
-    if (conn) {
-      await conn.release();
-    }
-  }
+     ,[title, content, price, productId]
+  )
 }
