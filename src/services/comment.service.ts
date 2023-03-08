@@ -39,8 +39,7 @@ export async function getCommentsByProductID(productID: number) {
             acc[cur.id] = {
                 id: cur.id,
                 comment: cur.comment,
-                user_id: cur.user_id,
-                created_at: cur.created_at,
+                nickname: cur.nickname,
                 updated_at: cur.updated_at,
                 child_comment: []
             };
@@ -51,8 +50,7 @@ export async function getCommentsByProductID(productID: number) {
             acc[cur.id].child_comment.push({
                 id: cur.child_id,
                 comment: cur.child_comment,
-                user_id: cur.child_user_id,
-                created_at: cur.child_created_at,
+                nickname: cur.child_nickname,
                 updated_at: cur.child_updated_at
             });
         }
