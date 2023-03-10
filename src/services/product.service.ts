@@ -48,7 +48,6 @@ export function parseAllProducts(products: any) {
       ...products[i],
       img: img,
       address: address_name,
-      comment: 0,
     };
   }
 

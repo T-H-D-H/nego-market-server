@@ -111,15 +111,14 @@ export async function hasLiked(productId: number, reqUserId: number) {
 //* 상품 ID, 유저 ID, 사진, 제목, 좋아요 갯수, 댓글 갯수, 지역
 export async function getAllProducts() {
   const [products] = await pool.query(
-    `SELECT P.id, P.user_id, P.img, P.title, P.price, COUNT(L.product_id) AS like_count, A.si, A.gu, A.dong
-    FROM product P
-    LEFT JOIN liked L ON P.id = L.product_id
-        ,user U
-        ,address A
-    WHERE P.user_id = U.id
-    AND U.address_id = A.id
-    GROUP BY P.id
-    ORDER BY like_count DESC`
+    `SELECT P.id, P.user_id, P.img, P.title, P.price, COUNT(DISTINCT L.user_id) AS like_count, COUNT(DISTINCT C.id) AS comment_count, A.si, A.gu, A.dong
+     FROM product P
+     LEFT JOIN liked L ON P.id = L.product_id
+     LEFT JOIN comment C ON P.id = C.product_id
+     JOIN user U ON P.user_id = U.id
+     JOIN address A ON U.address_id = A.id
+     GROUP BY P.id
+     ORDER BY like_count DESC;`
   );
 
   return products;
@@ -231,7 +230,21 @@ export async function deleteProduct(productId: number) {
        [productId]
     );
 
-    //* 3. TODO: 댓글이 존재하는 경우, 댓글도 삭제 (댓글 구현 후)
+    //* 3-1. 대댓글 삭제
+    await conn.query(
+      `DELETE FROM comment
+       WHERE product_id = ?
+       AND parent_id IS NOT NULL`,
+       [productId]
+    )
+
+    //* 3-1. 댓글 삭제
+    await conn.query(
+      `DELETE FROM comment
+       WHERE product_id = ?
+       AND parent_id IS NULL`,
+       [productId]
+    )
     
     //* 4. 상품 레코드 삭제
     await conn.query(
