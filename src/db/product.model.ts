@@ -111,7 +111,7 @@ export async function hasLiked(productId: number, reqUserId: number) {
 //* 상품 ID, 유저 ID, 사진, 제목, 좋아요 갯수, 댓글 갯수, 지역
 export async function getAllProducts() {
   const [products] = await pool.query(
-    `SELECT P.id, P.user_id, P.img, P.title, P.price, COUNT(DISTINCT L.user_id) AS like_count, COUNT(DISTINCT C.id) AS comment_count, A.si, A.gu, A.dong
+    `SELECT P.id, P.user_id, P.img, P.title, P.price, COUNT(DISTINCT L.user_id) AS like_count, COUNT(DISTINCT C.id) AS comment_count, P.status, A.si, A.gu, A.dong
      FROM product P
      LEFT JOIN liked L ON P.id = L.product_id
      LEFT JOIN comment C ON P.id = C.product_id
