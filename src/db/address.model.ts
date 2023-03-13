@@ -68,3 +68,15 @@ export async function getAddressById(id: number): Promise<Address> {
 
   return rows[0];
 }
+
+export async function getAddressNameByUserId(userId: number) {
+  const [rows] = await pool.query(
+    `SELECT si, gu, dong
+     FROM user u
+     INNER JOIN address a on u.address_id = a.id
+     WHERE u.id = ?;`
+     ,[userId]
+  );
+
+  return rows[0];
+}

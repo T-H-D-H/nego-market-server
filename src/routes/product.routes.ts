@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { Router, Request, Response, NextFunction } from "express";
 import { loginRequired } from "../middlewares/login-required";
+import { checkAuth } from "../middlewares/check-auth";
 import { upload } from "../middlewares/image-upload";
 import * as userService from "../services/user.service";
 import * as productService from "../services/product.service";
@@ -72,7 +73,7 @@ productRouter.post(
  *   summary: Get product detail page
  *   security:
  *     - bearerAuth: []
- *   description: ※로그인 한 유저만 사용할 수 있습니다. 토큰을 입력해 주세요.<br><br> 해당 상품 ID에 대한 상품 상세 정보를 조회합니다.
+ *   description: 해당 상품 ID에 대한 상품 상세 정보를 조회합니다.
  *   parameters:
  *     - name: id
  *       in: path
@@ -91,14 +92,19 @@ productRouter.post(
  *     '400':
  *       description: Bad Request
  */
-productRouter.get("/product/:id", loginRequired, async (req: Request, res: Response, next: NextFunction) => {
+productRouter.get("/product/:id", checkAuth, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const productId = Number(req.params.id);
 
     // 로그인 한 유저의 ID 취득, 요청 주체가 좋아요를 눌렀는지 확인하기 위함
     const email: string = req.userEmail;
-    const user: User = await userService.getUserByEmail(email);
-    const productDetail = await productService.getProductDetail(productId, user.id);
+    let productDetail; 
+    if (!email) {
+      productDetail = await productService.getProductDetail(productId, -1);
+    } else {
+      const user: User = await userService.getUserByEmail(email);
+      productDetail = await productService.getProductDetail(productId, user.id);
+    }
 
     res.status(200).send(productDetail);
   } catch (error) {
