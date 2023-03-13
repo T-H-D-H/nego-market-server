@@ -41,7 +41,8 @@
  *        - img
  *        - price
  *        - status
- *        - user_id
+ *        - nickname
+ *        - addressName
  *        - last_updated_at
  *        - tagName
  *        - likedCount
@@ -67,9 +68,13 @@
  *        status:
  *          type: integer
  *          description: "판매 상태 (0: 판매 전)"
- *        user_id:
- *          type: integer
- *          description: 상품 업로드 유저
+ *        nickname:
+ *          type: string
+ *          description: 상품 업로드 유저 닉네임
+ *        addressName:
+ *          type: object
+ *          description: 상품 업로드 유저 주소 (시, 구, 동)
+ *          example: { si: 부산광역시, gu: 해운대구, dong: 좌동 }
  *        last_updated_at:
  *          type: string
  *          format: custom-date-time
