@@ -3,6 +3,7 @@ import { userRouter } from "./routes/user.routes";
 import { addressRouter } from "./routes/address.routes";
 import { productRouter } from "./routes/product.routes";
 import { commentRouter } from "./routes/comment.routes";
+import { likeRouter } from "./routes/like.routes";
 import { errorHandler } from "./middlewares/error-handler";
 import { swaggerDocs } from "./utils/swagger";
 import * as cors from "cors";
@@ -28,6 +29,7 @@ app.use("/api", userRouter);
 app.use("/api", addressRouter);
 app.use("/api", productRouter);
 app.use("/api", commentRouter);
+app.use("/api", likeRouter);
 
 app.use(errorHandler);
 
